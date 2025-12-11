@@ -1,0 +1,95 @@
+version: '3.9'
+services:
+  postgres:
+    image: postgres:16
+    container_name: cosmic-postgres
+    environment:
+      POSTGRES_DB: cosmicdb
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: passForPGA
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./db-init:/docker-entrypoint-initdb.d
+
+  api-gateway:
+    build: ./api-gateway
+    container_name: api-gateway
+    ports:
+      - "8080:8080"
+    depends_on:
+      - user-service
+      - product-service
+      - cart-service
+      - order-service
+      - wishlist-service
+      - notification-service
+
+  user-service:
+    build: ./user-service
+    container_name: user-service
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/cosmicdb
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: passForPGA
+    depends_on:
+      - postgres
+
+  product-service:
+    build: ./product-service
+    container_name: product-service
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/cosmicdb
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: passForPGA
+    depends_on:
+      - postgres
+
+  cart-service:
+    build: ./cart-service
+    container_name: cart-service
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/cosmicdb
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: passForPGA
+    depends_on:
+      - postgres
+
+  order-service:
+    build: ./order-service
+    container_name: order-service
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/cosmicdb
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: passForPGA
+    depends_on:
+      - postgres
+      - notification-service
+
+  wishlist-service:
+    build: ./wishlist-service
+    container_name: wishlist-service
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/cosmicdb
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: passForPGA
+    depends_on:
+      - postgres
+
+  notification-service:
+    build: ./notification-service
+    container_name: notification-service
+    depends_on:
+      - postgres
+
+  frontend:
+    build: ./cosmiccraft-frontend
+    container_name: cosmic-frontend
+    ports:
+      - "3000:80"
+    depends_on:
+      - api-gateway
+
+volumes:
+  pgdata:
