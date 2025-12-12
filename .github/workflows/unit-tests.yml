@@ -26,7 +26,7 @@ jobs:
           for service in api-gateway user-service product-service cart-service order-service wishlist-service notification-service; do
             echo "Testing $service..."
             cd $service
-            mvn clean test -Dtest=!*ApplicationTests || exit 1
+            mvn clean test -Dsurefire.failIfNoSpecifiedTests=false || exit 1
             cd ..
           done
 
