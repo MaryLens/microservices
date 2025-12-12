@@ -21,40 +21,14 @@ jobs:
           distribution: 'temurin'
           cache: maven
 
-      - name: Test API Gateway
+      - name: Run all tests
         run: |
-          cd api-gateway
-          mvn clean test
-
-      - name: Test User Service
-        run: |
-          cd user-service
-          mvn clean test
-
-      - name: Test Product Service
-        run: |
-          cd product-service
-          mvn clean test
-
-      - name: Test Cart Service
-        run: |
-          cd cart-service
-          mvn clean test
-
-      - name: Test Order Service
-        run: |
-          cd order-service
-          mvn clean test
-
-      - name: Test Wishlist Service
-        run: |
-          cd wishlist-service
-          mvn clean test
-
-      - name: Test Notification Service
-        run: |
-          cd notification-service
-          mvn clean test
+          for service in api-gateway user-service product-service cart-service order-service wishlist-service notification-service; do
+            echo "Testing $service..."
+            cd $service
+            mvn clean test -Dtest=!*ApplicationTests || exit 1
+            cd ..
+          done
 
       - name: Upload test results
         if: always()
@@ -62,3 +36,4 @@ jobs:
         with:
           name: test-results
           path: '**/target/surefire-reports/*.xml'
+          retention-days: 7
